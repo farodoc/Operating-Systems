@@ -1,0 +1,14 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/jakub/Pulpit/sysopy/lab1",
+            "binaryPath": "/home/jakub/Pulpit/sysopy/lab1/countdown.o",
+            "binaryArgs": []
+        },
+        {
+            "cwd": "/home/jakub/Pulpit/sysopy/lab1",
+            "binaryPath": "/home/jakub/Pulpit/sysopy/lab1/countdown",
+            "binaryArgs": []
+        }
+    ]
+}
