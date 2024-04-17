@@ -6,19 +6,19 @@
 #include <time.h>
 #include <sys/time.h>
 
-double min(double a, double b){
+long double min(long double a, long double b){
     return a < b ? a : b;
 }
 
-double f(double x){
+long double f(long double x){
     return 4/(x*x+1);
 }
 
-double calculate_integral(double start, double end, double rect_width){
-    double res = 0;
+long double calculate_integral(long double start, long double end, long double rect_width){
+    long double res = 0;
 
-    double a = start;
-    double b = start + rect_width;
+    long double a = start;
+    long double b = start + rect_width;
 
     while(b < end){
         res += (f((a + b)/2) * (b - a));
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    double rect_width = atof(argv[1]);
+    long double rect_width = strtold(argv[1], NULL);
     int no_processes = atoi(argv[2]);
 
     if(ceil(1/rect_width) < no_processes){
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    double res = 0;
+    long double res = 0;
 
     struct timeval start_time, end_time;
     gettimeofday(&start_time, NULL);
@@ -55,10 +55,10 @@ int main(int argc, char *argv[]){
 
     unsigned long long no_intervals_total = (unsigned long long)ceil(1/rect_width);
     unsigned long long no_intervals_per_process = no_intervals_total/no_processes;
-    double interval_width = min(no_intervals_per_process * rect_width, 1);
+    long double interval_width = min(no_intervals_per_process * rect_width, 1);
 
-    double start = 0;
-    double end = interval_width;
+    long double start = 0;
+    long double end = interval_width;
 
     for(int i = 0; i < no_processes; i++){
         if(pipe(fd[i]) < 0){
@@ -71,9 +71,9 @@ int main(int argc, char *argv[]){
         if(pid == 0){
             close(fd[i][0]);
 
-            double temp_res = calculate_integral(start, end, rect_width);
+            long double temp_res = calculate_integral(start, end, rect_width);
 
-            if(write(fd[i][1], &temp_res, sizeof(double)) < 0){
+            if(write(fd[i][1], &temp_res, sizeof(long double)) < 0){
                 printf("Failed to write to pipe\n");
                 return -1;
             }
@@ -90,8 +90,8 @@ int main(int argc, char *argv[]){
     }
 
     for(int i = 0; i < no_processes; i++){
-        double temp_res;
-        if(read(fd[i][0], &temp_res, sizeof(double)) < 0){
+        long double temp_res;
+        if(read(fd[i][0], &temp_res, sizeof(long double)) < 0){
             printf("Failed to read from pipe\n");
             return -1;
         }
@@ -107,9 +107,9 @@ int main(int argc, char *argv[]){
     double time_elapsed = time_elapsed_sec + time_elapsed_usec / 1000000.0;
 
     printf("--------------------------\n");
-    printf("Rect width: %lf\n", rect_width);
+    printf("Rect width: %.15Lf\n", rect_width);
     printf("Processes: %d\n\n", no_processes);
-    printf("Result: %lf\n\n", res);
+    printf("Result: %Lf\n\n", res);
     printf("Time: %f seconds\n", time_elapsed);
     printf("--------------------------\n");
 
@@ -119,9 +119,9 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    fprintf(file, "Rect width: %lf\n", rect_width);
+    fprintf(file, "Rect width: %.15Lf\n", rect_width);
     fprintf(file, "Processes: %d\n\n", no_processes);
-    fprintf(file, "Result: %lf\n\n", res);
+    fprintf(file, "Result: %Lf\n\n", res);
     fprintf(file, "Time: %f seconds\n", time_elapsed);
 
     fclose(file);
