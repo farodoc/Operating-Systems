@@ -13,19 +13,20 @@ int main() {
     printf("Enter the end of the interval: ");
     scanf("%lf", &end);
 
-    int fd = open("pipe", O_WRONLY);
+    int fd1 = open("pipe1", O_WRONLY);
 
-    write(fd, &start, sizeof(double));
-    write(fd, &end, sizeof(double));
-    close(fd);
+    write(fd1, &start, sizeof(double));
+    write(fd1, &end, sizeof(double));
 
-    fd = open("pipe", O_RDONLY);
+    int fd2 = open("pipe2", O_RDONLY);
     double result;
     
-    read(fd, &result, sizeof(double));
-    close(fd);
+    read(fd2, &result, sizeof(double));
 
     printf("The result is: %lf\n", result);
+
+    close(fd1);
+    close(fd2);
 
     return 0;
 }

@@ -27,20 +27,22 @@ double calculate_integral(double start, double end, double rect_width){
 }
 
 int main() {
-    mkfifo("pipe", 0666);
+    mkfifo("pipe1", 0666);
+    mkfifo("pipe2", 0666);
 
-    int fd = open("pipe", O_RDONLY);
+    int fd1 = open("pipe1", O_RDONLY);
     double start, end;
     
-    read(fd, &start, sizeof(double));
-    read(fd, &end, sizeof(double));
-    close(fd);
+    read(fd1, &start, sizeof(double));
+    read(fd1, &end, sizeof(double));
 
     double result = calculate_integral(start, end, 0.01);
 
-    fd = open("pipe", O_WRONLY);
-    write(fd, &result, sizeof(double));
-    close(fd);
+    int fd2 = open("pipe2", O_WRONLY);
+    write(fd2, &result, sizeof(double));
+
+    close(fd1);
+    close(fd2);
 
     return 0;
 }
