@@ -6,4 +6,4 @@ all:
 	$(CC) $(CFLAGS) -o integral_solver integral_solver.c
 
 clean:
-	rm -f main integral_solver pipe
+	rm -f main integral_solver pipe1 pipe2
