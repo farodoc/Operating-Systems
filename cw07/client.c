@@ -17,8 +17,8 @@ int main() {
     };
 
     pid_t pid = getpid();
-    char client_queue_name[40] = {0};
-    sprintf(client_queue_name, "/server_chat_queue_%d", pid);
+    char client_queue_name[40];
+    sprintf(client_queue_name, "/chat_queue_%d", pid);
 
     mqd_t client_mq = mq_open(client_queue_name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
     if(client_mq == -1) {
@@ -37,7 +37,7 @@ int main() {
     msg.identifier = -1;
     strncpy(msg.text, client_queue_name, sizeof(msg.text));
 
-    mq_send(server_mq, (char*)&msg, sizeof(msg), 10);
+    mq_send(server_mq, (char*)&msg, sizeof(msg), 0);
 
     int fd[2];
 
@@ -78,13 +78,13 @@ int main() {
                         break;
 
                     case MESSAGE:
-                        fprintf(file, "Received message from client %d: %s\n", received_msg.identifier, received_msg.text);
+                        fprintf(file, "Received msg from client %d: %s\n", received_msg.identifier, received_msg.text);
                         fflush(file);
                         break;
 
 
                     default:
-                        printf("Unexpected message type\n");
+                        printf("Unexpected msg type\n");
                         break;
                 }
             }
@@ -99,7 +99,7 @@ int main() {
             char* buffer = malloc(MESSAGE_SIZE);
             
             while(1){
-                printf("Enter message: ");
+                printf("Enter msg: ");
                 fgets(buffer, MESSAGE_SIZE, stdin);
 
                 message send_msg;

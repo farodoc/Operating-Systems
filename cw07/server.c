@@ -39,7 +39,7 @@ int main() {
                 msg.type = IDENTIFIER;
                 msg.identifier = client_count;
 
-                mq_send(client_mq[client_count], (char*)&msg, sizeof(msg), 10);
+                mq_send(client_mq[client_count], (char*)&msg, sizeof(msg), 0);
 
                 client_count++;
                 break;
@@ -47,12 +47,12 @@ int main() {
             case MESSAGE:
                 for(int i = 0; i < client_count; i++) {
                     if(i != msg.identifier)
-                        mq_send(client_mq[i], (char*)&msg, sizeof(msg), 10);
+                        mq_send(client_mq[i], (char*)&msg, sizeof(msg), 0);
                 }
                 break;
 
             default:
-                printf("Unexpected message type\n");
+                printf("Unexpected msg type\n");
                 break;
         }
     }
