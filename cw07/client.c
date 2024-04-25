@@ -17,7 +17,7 @@ int main() {
     };
 
     pid_t pid = getpid();
-    char client_queue_name[40];
+    char client_queue_name[20];
     sprintf(client_queue_name, "/chat_queue_%d", pid);
 
     mqd_t client_mq = mq_open(client_queue_name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
