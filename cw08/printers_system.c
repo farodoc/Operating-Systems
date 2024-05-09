@@ -41,6 +41,7 @@ int main(int argc, char** argv){
 
     memset(printers, 0, sizeof(printers_t));
     printers->printers_count = printers_count;
+    sem_init(&printers->tasks_sem, 1, 1);
 
     for(int i = 0; i < printers_count; i++){
         sem_init(&printers->printers[i].printer_sem, 1, 1);
@@ -52,6 +53,17 @@ int main(int argc, char** argv){
         }
         else if(printer_pid == 0){
             while(1){
+                if(printers->printers[i].status == PRINTER_FREE){
+                    sem_wait(&printers->tasks_sem);
+                    if(printers->start != printers->end){
+                        strcpy(printers->printers[i].buffer, printers->tasks[printers->start].buffer);
+                        printers->printers[i].buffer_size = strlen(printers->tasks[printers->start].buffer);
+                        printers->start = (printers->start + 1) % MAX_TASKS;
+                        printers->printers[i].status = PRINTER_BUSY;
+                    }
+                    sem_post(&printers->tasks_sem);
+                }
+
                 if(printers->printers[i].status == PRINTER_BUSY){
                     for(int j = 0; j < printers->printers[i].buffer_size; j++){
                         printf("%c", printers->printers[i].buffer[j]);
@@ -75,6 +87,8 @@ int main(int argc, char** argv){
     for(int i = 0; i < printers_count; i++){
         sem_destroy(&printers->printers[i].printer_sem);
     }
+
+    sem_destroy(&printers->tasks_sem);
 
     munmap(printers, sizeof(printers_t));
 

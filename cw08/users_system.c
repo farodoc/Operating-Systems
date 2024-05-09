@@ -45,35 +45,22 @@ int main(int argc, char** argv){
             return -1;
         }
         else if(user_pid == 0){
+            srand(getpid());
             while(1){
-                int printer_idx = -1;
-                for(int j = 0; j < printers->printers_count; j++){
-                    int val;
-                    sem_getvalue(&printers->printers[j].printer_sem, &val);
-                    if(val == 1){
-                        printer_idx = j;
-                        break;
-                    }
-                }
-
-                if(printer_idx == -1){
-                    printer_idx = rand() % printers->printers_count;
-                }
-
-                if(sem_wait(&printers->printers[printer_idx].printer_sem) == -1){
-                    perror("sem_wait");
-                    return -1;
-                }
-
                 generate_random_text(user_buffer);
 
-                strcpy(printers->printers[printer_idx].buffer, user_buffer);
-                printers->printers[printer_idx].buffer_size = strlen(user_buffer);
-
-                printers->printers[printer_idx].status = PRINTER_BUSY;
-
-                printf("User %d using printer %d\n", i, printer_idx);
-                fflush(stdout);
+                int task_added = 0;
+                do {
+                    sem_wait(&printers->tasks_sem);
+                    if((printers->end + 1) % MAX_TASKS != printers->start){
+                        printers->tasks[printers->end].user_id = i;
+                        strcpy(printers->tasks[printers->end].buffer, user_buffer);
+                        printers->end = (printers->end + 1) % MAX_TASKS;
+                        task_added = 1;
+                        printf("User %d added task, \"%s\"\n", i, user_buffer);
+                    }
+                    sem_post(&printers->tasks_sem);
+                } while (!task_added);
 
                 sleep(1 + rand() % 5);
             }
