@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 700
+
 #include <ncurses.h>
 #include <locale.h>
 #include <unistd.h>
@@ -7,8 +9,23 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+#include <signal.h>
 
 const int grid_size = 30;
+
+void* thread_func(void* arg){
+	ThreadData* data = (ThreadData*)arg;
+	while(true){
+		pause();
+		update_grid_part(data);
+	}
+
+	return NULL;
+}
+
+void handler(int signum){
+	// Do nothing
+}
 
 int main(int argc, char **argv)
 {
@@ -37,6 +54,7 @@ int main(int argc, char **argv)
 	for(int i = 0; i < no_threads; i++){
 		thread_data[i].start = i * cells_per_thread;
 		thread_data[i].end = (i == no_threads - 1) ? grid_size * grid_size : (i + 1) * cells_per_thread;
+		pthread_create(&threads[i], NULL, thread_func, &thread_data[i]);
 	}
 
 	srand(time(NULL));
@@ -49,6 +67,13 @@ int main(int argc, char **argv)
 
 	init_grid(foreground);
 
+	struct sigaction sa;
+	sa.sa_handler = handler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+
+	sigaction(SIGUSR1, &sa, NULL);
+
 	while (true)
 	{
 		draw_grid(foreground);
@@ -58,11 +83,7 @@ int main(int argc, char **argv)
 		for(int i = 0; i < no_threads; i++){
 			thread_data[i].foreground = foreground;
 			thread_data[i].background = background;
-			pthread_create(&threads[i], NULL, update_grid_part, &thread_data[i]);
-		}
-
-		for(int i = 0; i < no_threads; i++){
-			pthread_join(threads[i], NULL);
+			pthread_kill(threads[i], SIGUSR1);
 		}
 
 		tmp = foreground;
