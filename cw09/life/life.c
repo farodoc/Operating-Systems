@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 	pthread_t threads[no_threads];
 	ThreadData thread_data[no_threads];
 
-	int cells_per_thread = grid_size / no_threads;
+	int cells_per_thread = (grid_size * grid_size) / no_threads;
 
 	for(int i = 0; i < no_threads; i++){
 		thread_data[i].start = i * cells_per_thread;
